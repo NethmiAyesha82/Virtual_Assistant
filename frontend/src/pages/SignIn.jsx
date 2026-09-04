@@ -7,7 +7,7 @@ import axios from "axios";
 
 function SignIn() {
     const [showPassword, setShowPassword] = useState(false);
-    const { serverUrl, refreshUser } = useContext(userDataContext);
+    const { refreshUser } = useContext(userDataContext);
     const navigate = useNavigate();
     
     const [email, setEmail] = useState("");
@@ -21,8 +21,8 @@ function SignIn() {
         setLoading(true);
 
         try {
-            const targetUrl = serverUrl ? `${serverUrl}/api/auth/signin` : "/api/auth/signin";
-            const response = await axios.post(targetUrl, { email, password });
+            // Vercel Rewrites හරහා Same-Origin හරහා Request එක යැවීම
+            const response = await axios.post("/api/auth/signin", { email, password });
             
             if (response.data && response.data.token) {
                 localStorage.setItem("token", response.data.token);

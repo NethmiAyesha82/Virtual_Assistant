@@ -9,21 +9,28 @@ import axios from "axios";
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
-  const serverUrl = "https://virtual-assistant-85xq.vercel.app";
+  // Same-origin proxy හරහා API ඉල්ලීම් යැවීම සඳහා serverUrl එක හිස්ව තබමු
+  const serverUrl = "";
 
   const [userData, setUserData] = useState(null);
   const [frontendImage, setFrontendImage] = useState(null);
   const [backendImage, setBackendImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   const handleCurrentUser = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const result = await axios.get(`${serverUrl}/api/user/current`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const result = await axios.get(
+        `${serverUrl}/api/user/current`,
+        getAuthHeaders()
+      );
 
       setUserData(result.data);
     } catch (error) {
@@ -35,10 +42,10 @@ const UserContext = ({ children }) => {
 
   const refreshUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
-      const result = await axios.get(`${serverUrl}/api/user/current`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const result = await axios.get(
+        `${serverUrl}/api/user/current`,
+        getAuthHeaders()
+      );
 
       setUserData(result.data);
     } catch (error) {
@@ -48,11 +55,10 @@ const UserContext = ({ children }) => {
 
   const getGeminiResponse = async (command) => {
     try {
-      const token = localStorage.getItem("token");
       const result = await axios.post(
         `${serverUrl}/api/user/askToassistant`,
         { command },
-        { headers: { Authorization: `Bearer ${token}` } }
+        getAuthHeaders()
       );
 
       return result.data;

@@ -6,6 +6,8 @@ import React, {
 } from "react";
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
+
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {

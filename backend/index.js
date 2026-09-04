@@ -11,8 +11,20 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "https://virtual-assistant-jade.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000"
+];
+
 app.use(cors({
-  origin: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all during development if needed
+    }
+  },
   credentials: true,
 }));
 

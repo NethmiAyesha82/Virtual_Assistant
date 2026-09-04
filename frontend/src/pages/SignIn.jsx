@@ -21,19 +21,18 @@ function SignIn() {
         setLoading(true);
 
         try {
-            // ⚠️ පහත රේඛාව තහවුරු කරගන්න: Axios request එක serverUrl භාවිතයෙන් යැවිය යුතුය
             const response = await axios.post(
                 `${serverUrl}/api/auth/signin`, 
                 { email, password }, 
                 { withCredentials: true }
             );
             
-            if (response.data) {
+            if (response.status === 200 || response.data) {
                 await refreshUser();
                 navigate("/customize"); 
             }
         } catch (err) {
-            const errMsg = err.response?.data?.message || err.message || "An unexpected error occurred";
+            const errMsg = err.response?.data?.message || err.response?.data || err.message || "Invalid Email or Password";
             setError(errMsg);
         } finally {
             setLoading(false);

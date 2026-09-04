@@ -19,7 +19,6 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Serverless DB Connection Middleware
 app.use(async (req, res, next) => {
   try {
     await connectDb();

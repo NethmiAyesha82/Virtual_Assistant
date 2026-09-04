@@ -9,7 +9,7 @@ import axios from "axios";
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
-  const serverUrl = "http://localhost:8000";
+  const serverUrl = "https://virtual-assistant-85xq.vercel.app/";
 
   const [userData, setUserData] = useState(null);
   const [frontendImage, setFrontendImage] = useState(null);

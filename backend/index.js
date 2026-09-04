@@ -29,7 +29,15 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-connectDb();
+// සෑම API Request එකකටම පෙර DB Connection එක තහවුරු කරන Middleware එක
+app.use(async (req, res, next) => {
+  try {
+    await connectDb();
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Database connection failed", error: error.message });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Backend Server Running Successfully!");

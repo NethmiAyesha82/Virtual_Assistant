@@ -13,8 +13,8 @@ const connectDb = async () => {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 5000,
+      bufferCommands: true, // Serverless buffering සඳහා true විය යුතුය
+      serverSelectionTimeoutMS: 10000,
     };
 
     cached.promise = mongoose.connect(process.env.MONGODB_URL, opts).then((mongooseInstance) => {

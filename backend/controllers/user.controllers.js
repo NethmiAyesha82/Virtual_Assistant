@@ -68,23 +68,20 @@ export const askToAssistant = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 1. History එකට Save කිරීම
     user.history.push(command);
     await user.save();
 
     const cmd = command.toLowerCase();
 
-    // 2. Creator Question Custom Fix
     if (cmd.includes("who created you") || cmd.includes("who made you") || cmd.includes("who built you")) {
       const creatorName = user.name || "you";
       return res.json({
         type: "general",
         userInput: command,
-        response: `I was created by ${creatorName}. How can I help you today`
+        response: `I was created by ${creatorName}. How can I help you today?`
       });
     }
 
-    // 3. Direct Browser Open Commands
     if (cmd.includes("open google")) {
       return res.json({ type: "google_search", userInput: "Google", response: "Opening Google" });
     }
@@ -101,7 +98,6 @@ export const askToAssistant = async (req, res) => {
       return res.json({ type: "calculator_open", userInput: "", response: "Opening Calculator" });
     }
 
-    // 4. Sri Lanka Time Zone Fix (Asia/Colombo)
     if (cmd.includes("time")) {
       const timeStr = new Date().toLocaleTimeString('en-US', {
         timeZone: 'Asia/Colombo',
@@ -136,7 +132,6 @@ export const askToAssistant = async (req, res) => {
       return res.json({ type: "get_battery", userInput: command, response: "Checking your battery status" });
     }
 
-    // 5. Gemini API Calls
     let result = null;
     try {
       result = await geminiResponse(command, user.assistantName, user.name);

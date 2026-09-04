@@ -30,7 +30,6 @@ export const signUp = async (req, res) => {
 
     const token = await genToken(user._id);
 
-    // Cross-Domain Deployment සඳහා Vercel වලට අනිවාර්යය Cookie Settings:
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -70,7 +69,6 @@ export const login = async (req, res) => {
 
     const token = await genToken(user._id);
 
-    // secure: true සහ sameSite: "none" එකතු කරන ලදී
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,

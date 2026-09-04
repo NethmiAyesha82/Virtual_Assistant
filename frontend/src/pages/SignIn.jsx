@@ -7,7 +7,7 @@ import axios from "axios";
 
 function SignIn() {
     const [showPassword, setShowPassword] = useState(false);
-    const { refreshUser, setUserData } = useContext(userDataContext);
+    const { refreshUser } = useContext(userDataContext);
     const navigate = useNavigate();
     
     const [email, setEmail] = useState("");
@@ -21,21 +21,15 @@ function SignIn() {
         setLoading(true);
 
         try {
+            // Vercel Rewrites හරහා Same-Origin හරහා Request එක යැවීම
             const response = await axios.post("/api/auth/signin", { email, password });
             
             if (response.data && response.data.token) {
                 localStorage.setItem("token", response.data.token);
-                
-                if (setUserData) {
-                    setUserData(response.data.user || response.data);
-                }
-                if (refreshUser) {
-                    await refreshUser();
-                }
-                
+                if (refreshUser) await refreshUser();
                 navigate("/customize"); 
-            } else {
-                setError("Sign in failed - Token not returned from server");
+            } else if (response.data && response.data.user) {
+                navigate("/customize");
             }
         } catch (err) {
             const errMsg = err.response?.data?.message || err.message || "Invalid Email or Password";

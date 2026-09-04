@@ -29,15 +29,8 @@ const Customize2 = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        alert("Authorization token missing. Please sign in again.");
-        navigate("/signin");
-        return;
-      }
-
       const formData = new FormData();
+
       formData.append("assistantName", assistantName);
 
       if (backendImage) {
@@ -48,22 +41,27 @@ const Customize2 = () => {
         formData.append("imageUrl", selectedImage);
       }
 
-      const baseUrl = serverUrl || "";
+      // LocalStorage එකෙන් Token එක ලබා ගැනීම
+      const token = localStorage.getItem("token");
+
       const result = await axios.post(
-        `${baseUrl}/api/user/update`,
+        `${serverUrl}/api/user/update`,
         formData,
         {
+          withCredentials: true,
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`, // Token එක Header එකට එකතු කිරීම
           },
         }
       );
 
-      if (setUserData) setUserData(result.data);
+      setUserData(result.data);
+
       navigate("/");
     } catch (error) {
       console.error(error.response?.data || error.message);
+
       alert(
         error.response?.data?.message ||
           "Failed to update assistant"

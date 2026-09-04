@@ -22,18 +22,14 @@ function SignUp() {
         setLoading(true);
 
         try {
-            const baseUrl = serverUrl || "";
             const response = await axios.post(
-                `${baseUrl}/api/auth/signup`,
-                { name, email, password }
+                `${serverUrl}/api/auth/signup`,
+                { name, email, password },
+                { withCredentials: true }
             );
 
-            if (response.data && response.data.token) {
-                localStorage.setItem("token", response.data.token);
-                if (setUserData) setUserData(response.data.user || response.data);
-                navigate("/customize");
-            } else if (response.data) {
-                if (setUserData) setUserData(response.data);
+            if (response.data) {
+                setUserData(response.data);
                 navigate("/customize");
             }
         } catch (err) {

@@ -11,16 +11,25 @@ dotenv.config();
 
 const app = express();
 
-// CORS එක ඕනෑම Frontend domain එකකට (Localhost සහ Vercel Live Link) allow වන සේ වෙනස් කරන්න:
 app.use(cors({
-  origin: true, // හෝ ["http://localhost:5173", "https:// virtual-assistant-....vercel.app"]
+  origin: true,
   credentials: true,
 }));
 
 app.use(express.json());
 app.use(cookieParser());
 
-// Vercel එකේ Live එක වැඩද බලන්න Root route එකක් එකතු කරන්න:
+// Serverless Requests සඳහා Database Connection Middleware එක:
+app.use(async (req, res, next) => {
+  try {
+    await connectDb();
+    next();
+  } catch (error) {
+    console.error("Database Middleware Error:", error);
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Backend Server Running Successfully!");
 });
@@ -28,10 +37,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 
-// index.js යටම කොටස මෙසේ තිබිය යුතුය:
 const port = process.env.PORT || 8000;
-
-connectDb();
 
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {

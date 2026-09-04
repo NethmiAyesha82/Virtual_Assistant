@@ -28,12 +28,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 
+// index.js යටම කොටස මෙසේ තිබිය යුතුය:
 const port = process.env.PORT || 8000;
 
-// Database එක සම්බන්ධ කිරීම
 connectDb();
 
-// Vercel Serverless Functions සඳහා `app.listen` අවශ්‍ය නැත
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

@@ -30,9 +30,10 @@ app.use("/api/user", userRouter);
 
 const port = process.env.PORT || 8000;
 
+// Database එක සම්බන්ධ කිරීම
 connectDb();
 
-// Local Development සඳහා පමණක් app.listen යොදා ගනී
+// Vercel Serverless Functions සඳහා `app.listen` අවශ්‍ය නැත
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

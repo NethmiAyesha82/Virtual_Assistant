@@ -11,13 +11,31 @@ dotenv.config();
 
 const app = express();
 
-// All origins allowed with credentials for mobile compatibility
-app.use(cors({
-  origin: function (origin, callback) {
-    return callback(null, true);
-  },
-  credentials: true,
-}));
+// Browser/Mobile Preflight (OPTIONS) Requests Handle කිරීම සඳහා
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+app.use(
+  cors({
+    origin: (origin, callback) => callback(null, true),
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -27,7 +45,7 @@ app.use(async (req, res, next) => {
     await connectDb();
     next();
   } catch (error) {
-    console.error("Database Middleware Error:", error);
+    console.error("Database Connection Error:", error);
     res.status(500).json({ message: "Database connection failed" });
   }
 });
@@ -41,7 +59,7 @@ app.use("/api/user", userRouter);
 
 const port = process.env.PORT || 8000;
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

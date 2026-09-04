@@ -29,8 +29,15 @@ const Customize2 = () => {
     setLoading(true);
 
     try {
-      const formData = new FormData();
+      const token = localStorage.getItem("token");
 
+      if (!token) {
+        alert("Authorization token missing. Please sign in again.");
+        navigate("/signin");
+        return;
+      }
+
+      const formData = new FormData();
       formData.append("assistantName", assistantName);
 
       if (backendImage) {
@@ -41,23 +48,22 @@ const Customize2 = () => {
         formData.append("imageUrl", selectedImage);
       }
 
+      const baseUrl = serverUrl || "";
       const result = await axios.post(
-        `${serverUrl}/api/user/update`,
+        `${baseUrl}/api/user/update`,
         formData,
         {
-          withCredentials: true,
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      setUserData(result.data);
-
+      if (setUserData) setUserData(result.data);
       navigate("/");
     } catch (error) {
       console.error(error.response?.data || error.message);
-
       alert(
         error.response?.data?.message ||
           "Failed to update assistant"

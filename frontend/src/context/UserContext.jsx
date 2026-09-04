@@ -9,7 +9,6 @@ import axios from "axios";
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
-  // අගට තියෙන '/' අයින් කරලා Backend URL එක දාන්න:
   const serverUrl = "https://virtual-assistant-85xq.vercel.app";
 
   const [userData, setUserData] = useState(null);

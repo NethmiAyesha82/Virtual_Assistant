@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Connection එක Cache කර තබා ගැනීමට Variable එකක්:
 let cached = global.mongoose;
 
 if (!cached) {
@@ -14,13 +13,13 @@ const connectDb = async () => {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false, // Connection එක නැතිනම් Mongoose Queries Buffer වීම වළක්වයි
-      serverSelectionTimeoutMS: 5000, // DB එක සොයාගැනීමට තත්පර 5කට වඩා නොගනී
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
     };
 
-    cached.promise = mongoose.connect(process.env.MONGODB_URL, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(process.env.MONGODB_URL, opts).then((mongooseInstance) => {
       console.log("MongoDB Connected Successfully");
-      return mongoose;
+      return mongooseInstance;
     });
   }
 

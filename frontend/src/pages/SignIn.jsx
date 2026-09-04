@@ -21,7 +21,9 @@ function SignIn() {
         setLoading(true);
 
         try {
-            const response = await axios.post(`${serverUrl}/api/auth/signin`, 
+            // ⚠️ පහත රේඛාව තහවුරු කරගන්න: Axios request එක serverUrl භාවිතයෙන් යැවිය යුතුය
+            const response = await axios.post(
+                `${serverUrl}/api/auth/signin`, 
                 { email, password }, 
                 { withCredentials: true }
             );

@@ -21,13 +21,10 @@ function SignIn() {
         setLoading(true);
 
         try {
-            const response = await axios.post(
-                `${serverUrl}/api/auth/signin`, 
-                { email, password }, 
-                { withCredentials: true }
-            );
+            const response = await axios.post(`${serverUrl}/api/auth/signin`, { email, password });
             
-            if (response.status === 200 || response.data) {
+            if (response.data?.token) {
+                localStorage.setItem("token", response.data.token);
                 await refreshUser();
                 navigate("/customize"); 
             }

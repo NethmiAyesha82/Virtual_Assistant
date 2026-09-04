@@ -6,8 +6,6 @@ import React, {
 } from "react";
 import axios from "axios";
 
-axios.defaults.withCredentials = true;
-
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
@@ -18,13 +16,19 @@ const UserContext = ({ children }) => {
   const [backendImage, setBackendImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   const handleCurrentUser = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const result = await axios.get(
         `${serverUrl}/api/user/current`,
-        {
-          withCredentials: true,
-        }
+        getAuthHeaders()
       );
 
       setUserData(result.data);
@@ -39,9 +43,7 @@ const UserContext = ({ children }) => {
     try {
       const result = await axios.get(
         `${serverUrl}/api/user/current`,
-        {
-          withCredentials: true,
-        }
+        getAuthHeaders()
       );
 
       setUserData(result.data);
@@ -55,7 +57,7 @@ const UserContext = ({ children }) => {
       const result = await axios.post(
         `${serverUrl}/api/user/askToassistant`,
         { command },
-        { withCredentials: true }
+        getAuthHeaders()
       );
 
       return result.data;

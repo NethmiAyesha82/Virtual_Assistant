@@ -17,12 +17,11 @@ const allowedOrigins = [
   "http://localhost:3000"
 ];
 
-// Manual CORS logic for strict mobile browser preflight requests
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
   } else {
     res.setHeader("Access-Control-Allow-Origin", "https://virtual-assistant-jade.vercel.app");
   }
@@ -44,15 +43,8 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(async (req, res, next) => {
-  try {
-    await connectDb();
-    next();
-  } catch (error) {
-    console.error("Database Connection Error:", error);
-    res.status(500).json({ message: "Database connection failed" });
-  }
-});
+// Connect Database before routes
+connectDb();
 
 app.get("/", (req, res) => {
   res.send("Backend Server Running Successfully!");

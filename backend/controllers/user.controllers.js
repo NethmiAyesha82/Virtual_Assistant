@@ -29,7 +29,6 @@ export const updateAssistant = async (req, res) => {
       updateData.assistantName = assistantName;
     }
 
-    // Direct Image URL එක පමණක් save කරන්න (Vercel Serverless වල local uploads වැඩ නොකරයි)
     if (imageUrl) {
       updateData.assistantImage = imageUrl;
     }
@@ -70,9 +69,8 @@ export const askToAssistant = async (req, res) => {
     }
 
     const cmd = command.toLowerCase();
-    const now = new Date();
 
-    // System Basic Commands (Gemini API Call එකට යන්නේ නැතිව direct return වෙන කොටස)
+    // Direct Browser Open Commands
     if (cmd.includes("open google")) {
       return res.json({ type: "google_search", userInput: "Google", response: "Opening Google" });
     }
@@ -89,34 +87,55 @@ export const askToAssistant = async (req, res) => {
       return res.json({ type: "calculator_open", userInput: "", response: "Opening Calculator" });
     }
 
+    // Sri Lanka Time Zone Fix (Asia/Colombo)
     if (cmd.includes("time")) {
-      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      return res.json({ type: "get_time", userInput: command, response: `The current time is ${timeStr}` });
+      const timeStr = new Date().toLocaleTimeString('en-US', {
+        timeZone: 'Asia/Colombo',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      return res.json({ 
+        type: "get_time", 
+        userInput: command, 
+        response: `The current time is ${timeStr}` 
+      });
     }
+
     if (cmd.includes("date")) {
-      const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      return res.json({ type: "get_date", userInput: command, response: `Today's date is ${dateStr}` });
+      const dateStr = new Date().toLocaleDateString('en-US', {
+        timeZone: 'Asia/Colombo',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      return res.json({ 
+        type: "get_date", 
+        userInput: command, 
+        response: `Today's date is ${dateStr}` 
+      });
     }
 
     if (cmd.includes("battery")) {
       return res.json({ type: "get_battery", userInput: command, response: "Checking your battery status" });
     }
 
-    // Safe Gemini API Calling
+    // Gemini API Request Wrapper
     let result = null;
     try {
       result = await geminiResponse(command, user.assistantName, user.name);
     } catch (gemErr) {
-      console.error("Gemini API Exec Error:", gemErr);
+      console.error("Gemini API Error:", gemErr);
     }
 
-    // Gemini fail වුවහොත් Safe Fallback Response එකක් ලබා දීම (500 crash නොවීමට)
     if (!result) {
       return res.json({
         type: "general",
         userInput: command,
         value: "",
-        response: "I'm having trouble connecting to AI services right now. Please try again later."
+        response: "I am having trouble connecting to AI services right now."
       });
     }
 
@@ -153,7 +172,7 @@ export const askToAssistant = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("AskToAssistant Error:", error);
+    console.error("AskToAssistant Exception:", error);
     return res.status(500).json({ message: error.message });
   }
 };

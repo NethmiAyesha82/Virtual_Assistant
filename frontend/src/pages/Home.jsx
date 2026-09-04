@@ -45,6 +45,9 @@ export const Home = () => {
   const isRecognitionRef = useRef(false)
   const recognitionRef = useRef(null)
 
+  // Fallback avatar image in case the assistant image fails to load
+  const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
+
   useEffect(() => {
     if (userData?.assistantName) {
       const greeting = new SpeechSynthesisUtterance(
@@ -401,13 +404,17 @@ export const Home = () => {
           <div className='w-[80vw] max-w-[300px] aspect-[3/4] overflow-hidden rounded-3xl border-2 border-blue-500/30 flex items-center justify-center bg-black'>
             <img
               key={userData?.assistantImage}
-              src={`${userData?.assistantImage}`}
+              src={userData?.assistantImage || defaultAvatar}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = defaultAvatar;
+              }}
               className='w-full h-full object-cover'
               alt='Assistant'
             />
           </div>
           <h1 className='text-white text-[24px] font-semibold mt-1 animate-pulse text-center'>
-            I'm {userData?.assistantName}
+            I'm {userData?.assistantName || "Assistant"}
           </h1>
           <img
             src={aiText ? aiImg : userImg}

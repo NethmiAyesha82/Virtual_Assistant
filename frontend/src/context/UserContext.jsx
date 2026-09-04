@@ -9,7 +9,6 @@ import axios from "axios";
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
-  // Same-origin proxy හරහා API ඉල්ලීම් යැවීම සඳහා serverUrl එක හිස්ව තබමු
   const serverUrl = "";
 
   const [userData, setUserData] = useState(null);
@@ -53,17 +52,18 @@ const UserContext = ({ children }) => {
     }
   }, [serverUrl]);
 
-  const getGeminiResponse = async (command) => {
+  // Gemini API Request (prompt සහ Authorization Header සමඟ)
+  const getGeminiResponse = async (prompt) => {
     try {
       const result = await axios.post(
         `${serverUrl}/api/user/askToassistant`,
-        { command },
+        { prompt },
         getAuthHeaders()
       );
 
       return result.data;
     } catch (error) {
-      console.error(error.response?.data || error.message);
+      console.error("Gemini Error:", error.response?.data || error.message);
       return null;
     }
   };

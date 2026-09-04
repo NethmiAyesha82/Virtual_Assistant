@@ -29,9 +29,8 @@ export const updateAssistant = async (req, res) => {
       updateData.assistantName = assistantName;
     }
 
-    if (req.file) {
-      updateData.assistantImage = `http://localhost:8000/uploads/${req.file.filename}`;
-    } else if (imageUrl) {
+    // Direct Image URL එක පමණක් save කරන්න (Vercel Serverless වල local uploads වැඩ නොකරයි)
+    if (imageUrl) {
       updateData.assistantImage = imageUrl;
     }
 
@@ -73,6 +72,7 @@ export const askToAssistant = async (req, res) => {
     const cmd = command.toLowerCase();
     const now = new Date();
 
+    // System Basic Commands (Gemini API Call එකට යන්නේ නැතිව direct return වෙන කොටස)
     if (cmd.includes("open google")) {
       return res.json({ type: "google_search", userInput: "Google", response: "Opening Google" });
     }
@@ -102,18 +102,36 @@ export const askToAssistant = async (req, res) => {
       return res.json({ type: "get_battery", userInput: command, response: "Checking your battery status" });
     }
 
-    const result = await geminiResponse(command, user.assistantName, user.name);
+    // Safe Gemini API Calling
+    let result = null;
+    try {
+      result = await geminiResponse(command, user.assistantName, user.name);
+    } catch (gemErr) {
+      console.error("Gemini API Exec Error:", gemErr);
+    }
 
+    // Gemini fail වුවහොත් Safe Fallback Response එකක් ලබා දීම (500 crash නොවීමට)
     if (!result) {
-      return res.status(500).json({ message: "Gemini failed or quota exceeded" });
+      return res.json({
+        type: "general",
+        userInput: command,
+        value: "",
+        response: "I'm having trouble connecting to AI services right now. Please try again later."
+      });
     }
 
+    let data = {};
     const jsonMatch = result.match(/{[\s\S]*}/);
-    if (!jsonMatch) {
-      return res.status(400).json({ message: "Invalid JSON from Gemini", raw: result });
-    }
 
-    const data = JSON.parse(jsonMatch[0]);
+    if (jsonMatch) {
+      try {
+        data = JSON.parse(jsonMatch[0]);
+      } catch (e) {
+        data = { response: result };
+      }
+    } else {
+      data = { response: result };
+    }
 
     if (data.type === "calculate" && data.value) {
       try {
@@ -133,6 +151,7 @@ export const askToAssistant = async (req, res) => {
       value: data.value || "",
       response: data.response || "I am not sure about that.",
     });
+
   } catch (error) {
     console.error("AskToAssistant Error:", error);
     return res.status(500).json({ message: error.message });

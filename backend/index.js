@@ -11,19 +11,10 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  "https://virtual-assistant-jade.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:3000"
-];
-
+// All origins allowed with credentials for mobile compatibility
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(null, true); // Allow all during development if needed
-    }
+    return callback(null, true);
   },
   credentials: true,
 }));

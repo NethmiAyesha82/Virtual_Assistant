@@ -22,7 +22,7 @@ function SignIn() {
 
         try {
             const response = await axios.post(
-                `${serverUrl}/api/auth/login`, 
+                `${serverUrl}/api/auth/signin`, 
                 { email, password }, 
                 { withCredentials: true }
             );

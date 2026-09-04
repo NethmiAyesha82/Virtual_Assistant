@@ -9,7 +9,8 @@ import axios from "axios";
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
-  const serverUrl = "https://virtual-assistant-85xq.vercel.app";
+  // Direct URL එක වෙනුවට Same Origin Proxy භාවිත කෙරේ
+  const serverUrl = "";
 
   const [userData, setUserData] = useState(null);
   const [frontendImage, setFrontendImage] = useState(null);

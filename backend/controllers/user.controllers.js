@@ -80,7 +80,7 @@ export const askToAssistant = async (req, res) => {
       return res.json({
         type: "general",
         userInput: command,
-        response: `I was created by ${creatorName}.`
+        response: `I was created by ${creatorName}. How can I help you today`
       });
     }
 

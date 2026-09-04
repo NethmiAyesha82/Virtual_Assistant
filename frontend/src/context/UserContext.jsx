@@ -9,28 +9,21 @@ import axios from "axios";
 export const userDataContext = createContext();
 
 const UserContext = ({ children }) => {
-  // Direct URL එක වෙනුවට Same Origin Proxy භාවිත කෙරේ
-  const serverUrl = "";
+  const serverUrl = "https://virtual-assistant-85xq.vercel.app";
 
   const [userData, setUserData] = useState(null);
   const [frontendImage, setFrontendImage] = useState(null);
   const [backendImage, setBackendImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  };
-
   const handleCurrentUser = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const result = await axios.get(
-        `${serverUrl}/api/user/current`,
-        getAuthHeaders()
-      );
+      const result = await axios.get(`${serverUrl}/api/user/current`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       setUserData(result.data);
     } catch (error) {
@@ -42,10 +35,10 @@ const UserContext = ({ children }) => {
 
   const refreshUser = useCallback(async () => {
     try {
-      const result = await axios.get(
-        `${serverUrl}/api/user/current`,
-        getAuthHeaders()
-      );
+      const token = localStorage.getItem("token");
+      const result = await axios.get(`${serverUrl}/api/user/current`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       setUserData(result.data);
     } catch (error) {
@@ -55,10 +48,11 @@ const UserContext = ({ children }) => {
 
   const getGeminiResponse = async (command) => {
     try {
+      const token = localStorage.getItem("token");
       const result = await axios.post(
         `${serverUrl}/api/user/askToassistant`,
         { command },
-        getAuthHeaders()
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       return result.data;

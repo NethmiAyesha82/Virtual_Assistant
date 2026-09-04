@@ -21,16 +21,19 @@ function SignIn() {
         setLoading(true);
 
         try {
-            const response = await axios.post(`${serverUrl}/api/auth/signin`, { email, password });
+            const targetUrl = serverUrl ? `${serverUrl}/api/auth/signin` : "/api/auth/signin";
+            const response = await axios.post(targetUrl, { email, password });
             
-            if (response.data?.token) {
+            if (response.data && response.data.token) {
                 localStorage.setItem("token", response.data.token);
-                await refreshUser();
+                if (refreshUser) await refreshUser();
                 navigate("/customize"); 
+            } else if (response.data && response.data.user) {
+                navigate("/customize");
             }
         } catch (err) {
-            const errMsg = err.response?.data?.message || err.response?.data || err.message || "Invalid Email or Password";
-            setError(errMsg);
+            const errMsg = err.response?.data?.message || err.message || "Invalid Email or Password";
+            setError(typeof errMsg === "string" ? errMsg : "Sign in failed");
         } finally {
             setLoading(false);
         }

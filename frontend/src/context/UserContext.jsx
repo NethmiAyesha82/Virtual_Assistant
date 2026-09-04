@@ -21,10 +21,22 @@ const UserContext = ({ children }) => {
     return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.clear();
+    setUserData(null);
+    setFrontendImage(null);
+    setBackendImage(null);
+    setSelectedImage(null);
+  };
+
   const handleCurrentUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        setUserData(null);
+        return;
+      }
 
       const result = await axios.get(
         `${serverUrl}/api/user/current`,
@@ -33,7 +45,9 @@ const UserContext = ({ children }) => {
 
       setUserData(result.data);
     } catch (error) {
-      if (error.response?.status !== 401) {
+      if (error.response?.status === 401) {
+        handleLogout();
+      } else {
         console.error(error.response?.data || error.message);
       }
     }
@@ -41,6 +55,12 @@ const UserContext = ({ children }) => {
 
   const refreshUser = useCallback(async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUserData(null);
+        return;
+      }
+
       const result = await axios.get(
         `${serverUrl}/api/user/current`,
         getAuthHeaders()
@@ -48,11 +68,13 @@ const UserContext = ({ children }) => {
 
       setUserData(result.data);
     } catch (error) {
+      if (error.response?.status === 401) {
+        handleLogout();
+      }
       console.error(error.response?.data || error.message);
     }
   }, [serverUrl]);
 
-  // Gemini API Request (prompt සහ Authorization Header සමඟ)
   const getGeminiResponse = async (prompt) => {
     try {
       const result = await axios.post(
@@ -86,6 +108,7 @@ const UserContext = ({ children }) => {
         selectedImage,
         setSelectedImage,
         getGeminiResponse,
+        handleLogout,
       }}
     >
       {children}

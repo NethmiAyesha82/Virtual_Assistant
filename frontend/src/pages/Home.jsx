@@ -10,10 +10,11 @@ import { RxCross1 } from "react-icons/rx"
 
 const getGeminiResponse = async (transcript, serverUrl) => {
   try {
+    const token = localStorage.getItem("token");
     const response = await axios.post(
       `${serverUrl}/api/user/askToassistant`,
       { command: transcript },
-      { withCredentials: true }
+      { headers: { Authorization: `Bearer ${token}` } }
     )
     return response.data
   } catch (error) {
@@ -23,16 +24,17 @@ const getGeminiResponse = async (transcript, serverUrl) => {
 }
 
 export const Home = () => {
-  const { userData, serverUrl, setUserData, refreshUser } =
+  const { userData, serverUrl, setUserData, refreshUser, handleLogout } =
     useContext(userDataContext)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!userData) {
+    const token = localStorage.getItem("token");
+    if (!token && !userData) {
       navigate("/signin");
     }
-  }, [userData, serverUrl, refreshUser]); 
+  }, [userData, navigate]); 
 
   const [aiResponse, setAiResponse] = useState(null)
   const [currentTranscript, setCurrentTranscript] = useState("")
@@ -45,7 +47,6 @@ export const Home = () => {
   const isRecognitionRef = useRef(false)
   const recognitionRef = useRef(null)
 
-  // Fallback avatar image in case the assistant image fails to load
   const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
 
   useEffect(() => {
@@ -146,14 +147,20 @@ export const Home = () => {
 
   const handleLogOut = async () => {
     try {
+      const token = localStorage.getItem("token");
       await axios.get(`${serverUrl}/api/auth/logout`, {
-        withCredentials: true,
-      })
-      setUserData(null)
-      navigate("/signup")
+        headers: { Authorization: `Bearer ${token}` }
+      });
     } catch (error) {
-      setUserData(null)
-      console.log(error)
+      console.log(error);
+    } finally {
+      if (handleLogout) {
+        handleLogout();
+      } else {
+        localStorage.clear();
+        setUserData(null);
+      }
+      navigate("/signin");
     }
   }
 
@@ -161,17 +168,18 @@ export const Home = () => {
     if (window.history.length > 1) {
       navigate(-1)
     } else {
-      navigate("/signup")
+      navigate("/signin")
     }
   }
 
   const handleClearHistory = async () => {
     try {
+      const token = localStorage.getItem("token");
       await axios.delete(
         `${serverUrl}/api/user/clearHistory`,
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      refreshUser();
+      if (refreshUser) refreshUser();
     } catch (err) {
       console.error(err);
     }

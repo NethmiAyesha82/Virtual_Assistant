@@ -21,15 +21,17 @@ function SignIn() {
         setLoading(true);
 
         try {
-            // Vercel Rewrites හරහා Same-Origin හරහා Request එක යැවීම
             const response = await axios.post("/api/auth/signin", { email, password });
             
             if (response.data && response.data.token) {
                 localStorage.setItem("token", response.data.token);
                 if (refreshUser) await refreshUser();
-                navigate("/customize"); 
-            } else if (response.data && response.data.user) {
-                navigate("/customize");
+                
+                if (response.data.user?.assistantName) {
+                    navigate("/");
+                } else {
+                    navigate("/customize");
+                }
             }
         } catch (err) {
             const errMsg = err.response?.data?.message || err.message || "Invalid Email or Password";

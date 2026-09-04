@@ -7,7 +7,7 @@ import axios from "axios";
 
 function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
-    const { serverUrl, setUserData } = useContext(userDataContext);
+    const { serverUrl, setUserData, refreshUser } = useContext(userDataContext);
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
@@ -24,12 +24,16 @@ function SignUp() {
         try {
             const response = await axios.post(
                 `${serverUrl}/api/auth/signup`,
-                { name, email, password },
-                { withCredentials: true }
+                { name, email, password }
             );
 
-            if (response.data) {
-                setUserData(response.data);
+            if (response.data && response.data.token) {
+                localStorage.setItem("token", response.data.token);
+                if (refreshUser) {
+                    await refreshUser();
+                } else if (setUserData) {
+                    setUserData(response.data.user || response.data);
+                }
                 navigate("/customize");
             }
         } catch (err) {

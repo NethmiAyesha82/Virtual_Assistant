@@ -11,8 +11,9 @@ import { RxCross1 } from "react-icons/rx"
 const getGeminiResponse = async (transcript, serverUrl) => {
   try {
     const token = localStorage.getItem("token");
+    const baseUrl = serverUrl ? serverUrl.replace(/\/$/, '') : '';
     const response = await axios.post(
-      `${serverUrl}/api/user/askToassistant`,
+      `${baseUrl}/api/user/askToassistant`,
       { command: transcript },
       { headers: { Authorization: `Bearer ${token}` } }
     )
@@ -148,7 +149,8 @@ export const Home = () => {
   const handleLogOut = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.get(`${serverUrl}/api/auth/logout`, {
+      const baseUrl = serverUrl ? serverUrl.replace(/\/$/, '') : '';
+      await axios.get(`${baseUrl}/api/auth/logout`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error) {
@@ -175,8 +177,9 @@ export const Home = () => {
   const handleClearHistory = async () => {
     try {
       const token = localStorage.getItem("token");
+      const baseUrl = serverUrl ? serverUrl.replace(/\/$/, '') : '';
       await axios.delete(
-        `${serverUrl}/api/user/clearHistory`,
+        `${baseUrl}/api/user/clearHistory`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (refreshUser) refreshUser();
@@ -281,15 +284,15 @@ export const Home = () => {
         }
       } else {
         const rateLimitMessage =
-          "My AI quota is exhausted. Please ask a basic system command instead."
+          "My AI quota is exhausted or unable to connect. Please ask a basic system command instead."
 
         setAiText(rateLimitMessage)
         setUserText("")
         speak(rateLimitMessage)
 
         setErrorBoxData({
-          title: "API Quota Exhausted",
-          body: `Command: "${transcript}"\nStatus: RESOURCE_EXHAUSTED`
+          title: "API Error",
+          body: `Command: "${transcript}"\nStatus: UNABLE_TO_FETCH_RESPONSE`
         })
 
         setShowErrorBox(true)
